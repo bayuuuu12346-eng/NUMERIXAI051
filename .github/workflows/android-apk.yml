@@ -33,7 +33,7 @@ jobs:
       - name: Build APK
         run: |
           mkdir -p www
-          echo '<h1>NUMERIXAI051</h1>' > www/index.html
+          cp index.html manifest.json sw.js icon.svg icon-192.png icon-512.png www/ www/index.html
           npx cap init NUMERIXAI051 com.numerixai051.app --web-dir=www
           npx cap add android
           npx cap sync android
