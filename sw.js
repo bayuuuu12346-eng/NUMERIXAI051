@@ -1,4 +1,4 @@
-const CACHE_NAME = "angka-ai-v6";
+const CACHE_NAME = "angka-ai-v7";
 const APP_SHELL = ["./", "./index.html", "./manifest.json", "./icon.svg", "./icon-192.png", "./icon-512.png"];
 
 self.addEventListener("install", event => {

@@ -1309,7 +1309,7 @@
       backdrop-filter: blur(12px);
       z-index: 30;
       display: none;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
+      grid-template-columns: repeat(5, minmax(0, 1fr));
       padding: 6px 6px calc(6px + env(safe-area-inset-bottom, 0px));
       gap: 3px;
     }
@@ -1406,6 +1406,13 @@
     .btn-generate:active,.btn-top-auth:active,.btn-top-save:active { transform:scale(.98); }
     @media (max-width:420px) { .auth-screen{padding:22px 12px 32px}.auth-hero h2{font-size:1.35rem}.top-bar{padding-left:10px;padding-right:10px}.brand-text h1{white-space:nowrap;font-size:.9rem}.btn-top-save{display:none}.btn-top-auth{padding:7px 8px} }
 
+  
+    #adminUsersList .admin-user-row { display:flex; justify-content:space-between; align-items:center; gap:10px; padding:12px 0; border-bottom:1px solid rgba(148,163,184,.16); }
+    #adminUsersList .admin-user-meta { min-width:0; overflow-wrap:anywhere; }
+    #adminUsersList .admin-user-actions { display:flex; align-items:center; gap:8px; flex-shrink:0; }
+    #adminUsersList .admin-user-actions button { border:1px solid rgba(148,163,184,.25); border-radius:9px; padding:7px 9px; background:rgba(15,23,42,.45); color:var(--text-main); font:inherit; font-size:.75rem; }
+    #adminUsersList .admin-user-actions button:disabled { opacity:.45; }
+
   </style>
 </head>
 <body>
@@ -1448,7 +1455,7 @@
       <div class="auth-hero">
         <div class="auth-badge">🔐 AKSES AKUN APLIKASI</div>
         <h2>Masuk ke TEBAK NOMOR</h2>
-        <p>Masuk untuk mulai membuat kombinasi angka, melihat pola, dan menyimpan riwayat tebakanmu.</p>
+        <p>Masuk dengan akun Supabase untuk mulai membuat kombinasi angka, melihat pola, dan menyimpan riwayat tebakanmu.</p>
       </div>
 
       <div class="card">
@@ -1459,8 +1466,8 @@
 
         <form id="loginForm" class="auth-form">
           <div class="field-box">
-            <label for="loginUser">Username</label>
-            <input type="text" class="text-input" id="loginUser" placeholder="Masukkan username kamu" autocomplete="username" required="">
+            <label for="loginUser">Email</label>
+            <input type="email" class="text-input" id="loginUser" placeholder="Masukkan email Supabase" autocomplete="username" required="">
           </div>
           <div class="field-box">
             <label for="loginPass">Kata Sandi (Password)</label>
@@ -1471,9 +1478,6 @@
             <span>➡</span>
             <span>Masuk ke Aplikasi</span>
           </button>
-          <button type="button" class="btn-action" id="btnDemoFill">
-            ⚡ Isi Akun Uji Coba Cepat
-          </button>
         </form>
 
         <form id="registerForm" class="auth-form" style="display: none;">
@@ -1482,12 +1486,12 @@
             <input type="text" class="text-input" id="regName" placeholder="contoh: Budi Santoso" required="">
           </div>
           <div class="field-box">
-            <label for="regUser">Username</label>
-            <input type="text" class="text-input" id="regUser" placeholder="Buat username unik" autocomplete="username" required="">
+            <label for="regUser">Email</label>
+            <input type="email" class="text-input" id="regUser" placeholder="Masukkan email" autocomplete="username" required="">
           </div>
           <div class="field-box">
             <label for="regPass">Buat Kata Sandi (min. 4 karakter)</label>
-            <input type="password" class="text-input" id="regPass" placeholder="Minimal 4 karakter" autocomplete="new-password" required="">
+            <input type="password" class="text-input" id="regPass" placeholder="Minimal 6 karakter" autocomplete="new-password" required="">
           </div>
           <div id="regNotice" class="notice-box" role="alert"></div>
           <button type="submit" class="btn-generate" style="margin-top: 4px;">
@@ -1497,7 +1501,7 @@
         </form>
 
         <div class="auth-note">
-          Akun dan sesi tersimpan lokal di perangkat Anda (dengan cadangan memori otomatis jika penyimpanan browser dibatasi). Saat menekan <strong>Keluar (Logout)</strong>, sesi aktif diakhiri sehingga halaman kembali ke layar masuk.
+          Autentikasi dan sesi dikelola oleh Supabase. Daftar akun baru akan dibuat sebagai pengguna biasa; hak admin hanya ditentukan oleh profil yang telah diverifikasi.
         </div>
       </div>
     </section>
@@ -1827,7 +1831,7 @@
             <span class="badge-gold">Panduan</span>
           </div>
           <div class="help-row"><strong>Apakah angka dijamin keluar?</strong><p>Tidak. Generator menghasilkan variasi angka untuk hiburan dan eksplorasi pola. Hasil acak tidak dapat memastikan hasil undian atau kemenangan.</p></div>
-          <div class="help-row"><strong>Di mana data disimpan?</strong><p>Versi ini menyimpan akun, pengaturan, dan riwayat secara lokal di browser/perangkat. Data tidak otomatis tersinkron ke cloud atau perangkat lain.</p></div>
+          <div class="help-row"><strong>Di mana data disimpan?</strong><p>Login dan profil akun dikelola oleh Supabase. Pengaturan generator dan riwayat aplikasi tetap disimpan lokal di browser/perangkat ini.</p></div>
           <div class="help-row"><strong>Apakah Coach AI selalu online?</strong><p>Coach lokal dapat memberi panduan dasar. Jawaban model AI eksternal memerlukan API Key sendiri dan koneksi internet; penggunaan API dapat dikenai biaya penyedia.</p></div>
           <div class="help-row"><strong>Bagaimana menjaga data?</strong><p>Gunakan Cadangkan Data secara berkala dan simpan file JSON di tempat aman. Jangan membagikan kata sandi atau API Key.</p></div>
         </div>
@@ -1852,6 +1856,31 @@
           </button>
         </div>
       </section>
+
+      <!-- Admin Control Panel: only rendered for verified active admins -->
+      <section id="tab-admin" class="tab-panel">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">🛡️ Panel Kontrol Admin</span>
+            <span class="badge-emerald" id="adminStatusBadge">Admin Aktif</span>
+          </div>
+          <p class="section-hint">Panel ini hanya tersedia untuk akun dengan role <strong>admin</strong> dan status <strong>is_active = true</strong> yang diverifikasi dari tabel profiles.</p>
+          <div class="profile-box">
+            <div>
+              <div class="profile-name" id="adminProfileName">-</div>
+              <div class="profile-meta" id="adminProfileEmail">-</div>
+            </div>
+            <span class="badge-gold">ADMIN</span>
+          </div>
+          <div class="copy-bar" style="margin-top:12px;">
+            <button type="button" class="btn-action" id="btnAdminRefresh">↻ Muat Ulang Pengguna</button>
+          </div>
+          <div id="adminNotice" class="notice-box" role="status"></div>
+          <div id="adminUsersList" style="margin-top:12px;">
+            <p class="section-hint">Tekan Muat Ulang Pengguna untuk melihat daftar profil.</p>
+          </div>
+        </div>
+      </section>
     </main>
 
     <!-- Bottom Navigation -->
@@ -1868,6 +1897,10 @@
         <span>👤</span>
         <span>Akun</span>
       </button>
+      <button type="button" class="nav-item" id="btnAdminNav" data-tab="admin" style="display:none;">
+        <span>🛡️</span>
+        <span>Admin</span>
+      </button>
       <button type="button" class="nav-item" id="btnNavLogout" data-action="logout">
         <span>🚪</span>
         <span>Keluar</span>
@@ -1875,11 +1908,17 @@
     </nav>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     (function() {
       "use strict";
 
       var ICON_SRC = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj4KICA8ZGVmcz4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0iYmciIHgxPSIwIiB5MT0iMCIgeDI9IjEiIHkyPSIxIj4KICAgICAgPHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0iIzA2NWY0NiIvPgogICAgICA8c3RvcCBvZmZzZXQ9IjU1JSIgc3RvcC1jb2xvcj0iIzA2NGUzYiIvPgogICAgICA8c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9IiMwMjJjMjIiLz4KICAgIDwvbGluZWFyR3JhZGllbnQ+CiAgICA8bGluZWFyR3JhZGllbnQgaWQ9ImdvbGQiIHgxPSIwIiB5MT0iMCIgeDI9IjEiIHkyPSIxIj4KICAgICAgPHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0iI2ZiYmYyNCIvPgogICAgICA8c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9IiNkOTc3MDYiLz4KICAgIDwvbGluZWFyR3JhZGllbnQ+CiAgPC9kZWZzPgogIDxyZWN0IHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiByeD0iMTE2IiBmaWxsPSJ1cmwoI2JnKSIvPgogIDxyZWN0IHg9IjIwIiB5PSIyMCIgd2lkdGg9IjQ3MiIgaGVpZ2h0PSI0NzIiIHJ4PSI5OCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJ1cmwoI2dvbGQpIiBzdHJva2Utd2lkdGg9IjEwIiBzdHJva2Utb3BhY2l0eT0iMC43NSIvPgogIDxjaXJjbGUgY3g9IjI1NiIgY3k9IjIzNiIgcj0iMTI2IiBmaWxsPSIjMDcxNzE1IiBzdHJva2U9InVybCgjZ29sZCkiIHN0cm9rZS13aWR0aD0iMTIiLz4KICA8dGV4dCB4PSIyNTYiIHk9IjI2OCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9InN5c3RlbS11aSwtYXBwbGUtc3lzdGVtLFNlZ29lIFVJLFJvYm90byxzYW5zLXNlcmlmIiBmb250LXNpemU9IjEyMiIgZm9udC13ZWlnaHQ9IjkwMCIgZmlsbD0iI2ZiYmYyNCIgbGV0dGVyLXNwYWNpbmc9Ii00Ij5BSTwvdGV4dD4KICA8dGV4dCB4PSIyNTYiIHk9IjQxOCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9InN5c3RlbS11aSwtYXBwbGUtc3lzdGVtLFNlZ29lIFVJLFJvYm90byxzYW5zLXNlcmlmIiBmb250LXNpemU9IjQ0IiBmb250LXdlaWdodD0iODAwIiBmaWxsPSIjYTdmM2QwIiBsZXR0ZXItc3BhY2luZz0iNiI+VEVCQUtBTjwvdGV4dD4KPC9zdmc+";
+      var SUPABASE_URL = "https://dwtxstpejgzkkxdryhxc.supabase.co";
+      var SUPABASE_PUBLISHABLE_KEY = "sb_publishable_n0mlTZ73KrL1C5wdyP5jzg_Ard7RZUS";
+      var sbClient = (window.supabase && window.supabase.createClient)
+        ? window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY)
+        : null;
       var USERS_KEY = "angka_keberuntungan_users_v1";
       var SESSION_KEY = "angka_keberuntungan_session_v1";
       var DATA_PREFIX = "angka_keberuntungan_data_v1_";
@@ -1942,6 +1981,8 @@
 
       var state = {
         currentUser: null,
+        supabaseUser: null,
+        profile: null,
         numbers: [],
         mode: "pure",
         parity: "odd",
@@ -1971,6 +2012,12 @@
         authScreen: document.getElementById("authScreen"),
         mainView: document.getElementById("mainView"),
         bottomNav: document.getElementById("bottomNav"),
+        btnAdminNav: document.getElementById("btnAdminNav"),
+        adminProfileName: document.getElementById("adminProfileName"),
+        adminProfileEmail: document.getElementById("adminProfileEmail"),
+        adminUsersList: document.getElementById("adminUsersList"),
+        adminNotice: document.getElementById("adminNotice"),
+        btnAdminRefresh: document.getElementById("btnAdminRefresh"),
         tabBtnLogin: document.getElementById("tabBtnLogin"),
         tabBtnRegister: document.getElementById("tabBtnRegister"),
         loginForm: document.getElementById("loginForm"),
@@ -1982,7 +2029,6 @@
         regUser: document.getElementById("regUser"),
         regPass: document.getElementById("regPass"),
         regNotice: document.getElementById("regNotice"),
-        btnDemoFill: document.getElementById("btnDemoFill"),
         profileDisplayName: document.getElementById("profileDisplayName"),
         profileDisplayUser: document.getElementById("profileDisplayUser"),
         profileLoginTime: document.getElementById("profileLoginTime"),
@@ -2336,28 +2382,94 @@
         }
       }
 
-      function completeLogin(userObj) {
+      function isActiveAdmin() {
+        return !!(state.profile && state.profile.role === "admin" && state.profile.is_active === true);
+      }
+
+      function showAdminNotice(message, type) {
+        if (!els.adminNotice) return;
+        els.adminNotice.textContent = message || "";
+        els.adminNotice.className = message ? ("notice-box show " + (type || "info")) : "notice-box";
+      }
+
+      function applyAuthLayout() {
+        var loggedIn = !!state.currentUser;
+        els.authScreen.classList.toggle("active", !loggedIn);
+        els.mainView.classList.toggle("active", loggedIn);
+        els.bottomNav.classList.toggle("active", loggedIn);
+        var admin = loggedIn && isActiveAdmin();
+        if (els.btnAdminNav) els.btnAdminNav.style.display = admin ? "flex" : "none";
+        if (!admin && document.getElementById("tab-admin")) {
+          document.getElementById("tab-admin").classList.remove("active");
+        }
+
+        if (loggedIn) {
+          els.statusText.textContent = "Akun: " + state.currentUser.name;
+          els.topAuthIcon.textContent = "🚪";
+          els.topAuthLabel.textContent = "Keluar";
+          els.btnTopAuth.classList.add("logged-in");
+          els.profileDisplayName.textContent = state.currentUser.name;
+          els.profileDisplayUser.textContent = state.currentUser.username;
+          els.profileLoginTime.textContent = "Masuk " + (state.currentUser.loginAt || "Baru saja");
+          if (admin) {
+            els.adminProfileName.textContent = state.currentUser.name;
+            els.adminProfileEmail.textContent = state.currentUser.username;
+          }
+        } else {
+          els.statusText.textContent = "Silakan Masuk Akun";
+          els.topAuthIcon.textContent = "🔐";
+          els.topAuthLabel.textContent = "Masuk";
+          els.btnTopAuth.classList.remove("logged-in");
+          state.numbers = [];
+          els.numbersGrid.innerHTML = "";
+        }
+      }
+
+      async function loadProfileForUser(authUser) {
+        if (!sbClient || !authUser) throw new Error("Koneksi Supabase belum tersedia.");
+        var result = await sbClient.from("profiles")
+          .select("id,email,display_name,role,is_active,created_at")
+          .eq("id", authUser.id).maybeSingle();
+        if (result.error) throw result.error;
+        if (!result.data) throw new Error("Profil akun tidak ditemukan di tabel profiles. Hubungi admin.");
+        if (result.data.is_active !== true) throw new Error("Akun ini tidak aktif. Hubungi admin.");
+        return result.data;
+      }
+
+      async function acceptSupabaseSession(authUser) {
+        var profile = await loadProfileForUser(authUser);
+        state.supabaseUser = authUser;
+        state.profile = profile;
+        var email = profile.email || authUser.email || "";
+        var displayName = profile.display_name || email.split("@")[0] || "Pengguna";
         var now = new Date();
         var jam = now.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
-        var sessionUser = {
-          username: userObj.username,
-          name: userObj.name || userObj.username,
+        state.currentUser = {
+          id: authUser.id,
+          username: email,
+          name: displayName,
+          role: profile.role || "user",
+          is_active: profile.is_active === true,
           loginAt: jam
         };
-        state.currentUser = sessionUser;
-        writeSession(sessionUser);
         clearAuthNotices();
         els.loginPass.value = "";
         els.regPass.value = "";
-        loadUserData(sessionUser.username);
+        loadUserData(email);
         applyAuthLayout();
         activateTab("generator");
         generateNumbers();
       }
 
-      function logoutAccount() {
+      async function logoutAccount() {
         saveUserData();
+        if (sbClient) {
+          var result = await sbClient.auth.signOut();
+          if (result.error) console.warn("Supabase signOut:", result.error.message);
+        }
         state.currentUser = null;
+        state.supabaseUser = null;
+        state.profile = null;
         state.numbers = [];
         state.commandRationale = "";
         els.analysisCard.classList.remove("show");
@@ -2371,7 +2483,98 @@
         applyAuthLayout();
       }
 
-      function activateTab(tabName) {
+      async function refreshAdminUsers() {
+        if (!isActiveAdmin()) {
+          showAdminNotice("Akses ditolak. Hanya admin aktif yang dapat membuka panel ini.", "error");
+          activateTab("generator");
+          return;
+        }
+        showAdminNotice("Memuat daftar profil...", "info");
+        els.adminUsersList.innerHTML = "";
+        var result = await sbClient.from("profiles")
+          .select("id,email,display_name,role,is_active,created_at")
+          .order("created_at", { ascending: false });
+        if (result.error) {
+          showAdminNotice("Gagal memuat profil: " + result.error.message + ". Periksa kebijakan RLS Supabase.", "error");
+          return;
+        }
+        var rows = result.data || [];
+        if (!rows.length) {
+          els.adminUsersList.innerHTML = '<p class="section-hint">Belum ada profil pengguna.</p>';
+        } else {
+          els.adminUsersList.innerHTML = rows.map(function(row) {
+            var safeEmail = escapeHtml(row.email || "(tanpa email)");
+            var safeName = escapeHtml(row.display_name || "Tanpa nama");
+            var role = escapeHtml(row.role || "user");
+            var status = row.is_active ? "Aktif" : "Nonaktif";
+            var isSelf = state.supabaseUser && row.id === state.supabaseUser.id;
+            return '<div class="admin-user-row">' +
+              '<div class="admin-user-meta"><strong>' + safeName + '</strong><div class="section-hint">' + safeEmail + '</div><div class="section-hint">Role: ' + role + ' · Status: ' + status + '</div></div>' +
+              '<div class="admin-user-actions"><button type="button" data-admin-toggle="' + escapeHtml(row.id) + '" data-next-active="' + (!row.is_active) + '"' + (isSelf ? ' disabled title="Tidak dapat menonaktifkan akun sendiri"' : '') + '>' + (row.is_active ? "Nonaktifkan" : "Aktifkan") + '</button></div>' +
+              '</div>';
+          }).join("");
+        }
+        showAdminNotice("Berhasil memuat " + rows.length + " profil.", "success");
+      }
+
+      async function setUserActive(userId, nextActive) {
+        if (!isActiveAdmin()) {
+          showAdminNotice("Akses ditolak.", "error");
+          return;
+        }
+        var result = await sbClient.from("profiles")
+          .update({ is_active: nextActive })
+          .eq("id", userId)
+          .select("id,is_active").maybeSingle();
+        if (result.error) {
+          showAdminNotice("Perubahan gagal: " + result.error.message + ". Periksa kebijakan UPDATE RLS.", "error");
+          return;
+        }
+        if (!result.data) {
+          showAdminNotice("Tidak ada baris yang berubah. Periksa kebijakan RLS.", "error");
+          return;
+        }
+        await refreshAdminUsers();
+      }
+
+      async function verifyActiveAdminFresh() {
+        if (!state.supabaseUser || !sbClient) return false;
+        var result = await sbClient.from("profiles")
+          .select("id,email,display_name,role,is_active,created_at")
+          .eq("id", state.supabaseUser.id).maybeSingle();
+        if (result.error || !result.data) return false;
+        state.profile = result.data;
+        if (state.profile.is_active !== true || state.profile.role !== "admin") {
+          applyAuthLayout();
+          return false;
+        }
+        return true;
+      }
+
+      function activateTab(tabName, adminVerified) {
+        if (tabName === "admin" && !adminVerified) {
+          if (!isActiveAdmin()) {
+            setNotice("Panel admin hanya untuk akun admin yang aktif.", "error");
+            tabName = "generator";
+          } else {
+            showAdminNotice("Memverifikasi hak akses admin...", "info");
+            verifyActiveAdminFresh().then(function(ok) {
+              if (ok) activateTab("admin", true);
+              else {
+                showAdminNotice("Akses admin tidak aktif atau tidak dapat diverifikasi.", "error");
+                activateTab("generator");
+              }
+            }).catch(function() {
+              showAdminNotice("Gagal memverifikasi hak akses admin.", "error");
+              activateTab("generator");
+            });
+            return;
+          }
+        }
+        if (tabName === "admin" && !isActiveAdmin()) {
+          setNotice("Panel admin hanya untuk akun admin yang aktif.", "error");
+          tabName = "generator";
+        }
         var navs = document.querySelectorAll(".nav-item");
         for (var n = 0; n < navs.length; n++) {
           var tAttr = navs[n].getAttribute("data-tab");
@@ -2384,6 +2587,9 @@
         if (tabName === "patterns") {
           renderPatternsTab();
           renderActivityAnalytics();
+        }
+        if (tabName === "admin" && adminVerified) {
+          refreshAdminUsers().catch(function(err) { showAdminNotice(err.message || "Gagal memuat panel admin.", "error"); });
         }
       }
 
@@ -3542,87 +3748,84 @@
       els.tabBtnLogin.addEventListener("click", function() { switchAuthMode("login"); });
       els.tabBtnRegister.addEventListener("click", function() { switchAuthMode("register"); });
 
-      els.btnDemoFill.addEventListener("click", function() {
-        clearAuthNotices();
-        els.loginUser.value = "demo_user";
-        els.loginPass.value = "1234";
-      });
-
-      els.loginForm.addEventListener("submit", function(e) {
+      els.loginForm.addEventListener("submit", async function(e) {
         e.preventDefault();
         clearAuthNotices();
-        var uVal = (els.loginUser.value || "").trim();
-        var pVal = els.loginPass.value || "";
-        if (!uVal || !pVal) {
-          showAuthNotice(els.loginNotice, "Lengkapi username/email dan kata sandi.");
+        var email = (els.loginUser.value || "").trim().toLowerCase();
+        var password = els.loginPass.value || "";
+        if (!email || !password) {
+          showAuthNotice(els.loginNotice, "Masukkan email dan kata sandi.");
           return;
         }
-        var users = readUsers();
-        var found = null;
-        for (var i = 0; i < users.length; i++) {
-          if (users[i].username.toLowerCase() === uVal.toLowerCase()) {
-            found = users[i];
-            break;
-          }
-        }
-        if (found) {
-          if (found.password !== pVal) {
-            showAuthNotice(els.loginNotice, "Kata sandi tidak sesuai.");
-            return;
-          }
-          completeLogin(found);
+        if (!sbClient) {
+          showAuthNotice(els.loginNotice, "Supabase JS belum termuat. Periksa koneksi internet lalu muat ulang.");
           return;
         }
-        if (uVal.toLowerCase() === "demo_user" && pVal === "1234") {
-          var demoAccount = { username: "demo_user", name: "Pengguna Demo", password: pVal };
-          users.push(demoAccount);
-          writeUsers(users);
-          completeLogin(demoAccount);
+        var authResult = await sbClient.auth.signInWithPassword({ email: email, password: password });
+        if (authResult.error) {
+          showAuthNotice(els.loginNotice, "Login gagal: " + authResult.error.message);
           return;
         }
-        showAuthNotice(els.loginNotice, "Akun belum terdaftar. Silakan buat akun di tab Daftar Akun.");
+        try {
+          await acceptSupabaseSession(authResult.data.user);
+        } catch (err) {
+          await sbClient.auth.signOut();
+          showAuthNotice(els.loginNotice, err.message || "Akun tidak dapat diverifikasi.");
+        }
       });
 
-      els.registerForm.addEventListener("submit", function(e) {
+      els.registerForm.addEventListener("submit", async function(e) {
         e.preventDefault();
         clearAuthNotices();
         var nameVal = (els.regName.value || "").trim();
-        var userVal = (els.regUser.value || "").trim();
+        var emailVal = (els.regUser.value || "").trim().toLowerCase();
         var passVal = els.regPass.value || "";
-
-        if (!nameVal || !userVal || passVal.length < 4) {
-          showAuthNotice(els.regNotice, "Isi nama, username/email, dan kata sandi minimal 4 karakter.");
+        if (!nameVal || !emailVal || passVal.length < 6) {
+          showAuthNotice(els.regNotice, "Isi nama, email yang valid, dan kata sandi minimal 6 karakter.");
           return;
         }
-
-        var users = readUsers();
-        for (var i = 0; i < users.length; i++) {
-          if (users[i].username.toLowerCase() === userVal.toLowerCase()) {
-            showAuthNotice(els.regNotice, "Username atau email sudah digunakan. Silakan masuk.");
-            return;
-          }
+        if (!sbClient) {
+          showAuthNotice(els.regNotice, "Supabase JS belum termuat. Periksa koneksi internet lalu muat ulang.");
+          return;
         }
-
-        var newUser = {
-          username: userVal,
-          name: nameVal,
-          password: passVal
-        };
-        users.push(newUser);
-        writeUsers(users);
-        completeLogin(newUser);
+        var signUpResult = await sbClient.auth.signUp({
+          email: emailVal,
+          password: passVal,
+          options: { data: { display_name: nameVal } }
+        });
+        if (signUpResult.error) {
+          showAuthNotice(els.regNotice, "Pendaftaran gagal: " + signUpResult.error.message);
+          return;
+        }
+        if (signUpResult.data.user && signUpResult.data.session) {
+          try { await acceptSupabaseSession(signUpResult.data.user); }
+          catch (err) { showAuthNotice(els.regNotice, err.message || "Profil belum dapat diverifikasi."); }
+        } else {
+          showAuthNotice(els.regNotice, "Pendaftaran berhasil. Periksa email untuk konfirmasi, lalu masuk.");
+          switchAuthMode("login");
+          els.loginUser.value = emailVal;
+        }
       });
 
       els.btnTopAuth.addEventListener("click", function() {
         if (state.currentUser) {
-          logoutAccount();
+          logoutAccount().catch(function(err) { console.error(err); });
         } else {
           switchAuthMode("login");
           applyAuthLayout();
         }
       });
 
-      els.btnLogoutMain.addEventListener("click", logoutAccount);
+      els.btnLogoutMain.addEventListener("click", function() { logoutAccount().catch(function(err) { console.error(err); }); });
+      if (els.btnAdminRefresh) els.btnAdminRefresh.addEventListener("click", function() {
+        refreshAdminUsers().catch(function(err) { showAdminNotice(err.message || "Gagal memuat pengguna.", "error"); });
+      });
+      if (els.adminUsersList) els.adminUsersList.addEventListener("click", function(e) {
+        var button = e.target.closest("[data-admin-toggle]");
+        if (!button) return;
+        setUserActive(button.getAttribute("data-admin-toggle"), button.getAttribute("data-next-active") === "true")
+          .catch(function(err) { showAdminNotice(err.message || "Perubahan gagal.", "error"); });
+      });
       els.btnInstallBanner.addEventListener("click", triggerInstallFlow);
       els.btnInstallGuide.addEventListener("click", triggerInstallFlow);
 
@@ -3650,7 +3853,7 @@
         var node = e.target;
         while (node && node !== document.body) {
           if (node.getAttribute && node.getAttribute("data-action") === "logout") {
-            logoutAccount();
+            logoutAccount().catch(function(err) { console.error(err); });
             return;
           }
           if (node.getAttribute && node.getAttribute("data-coach-q")) {
@@ -3755,18 +3958,33 @@
 
       initVoiceCoach();
 
-      var savedSession = readSession();
-      if (savedSession && savedSession.username) {
-        state.currentUser = savedSession;
-        loadUserData(savedSession.username);
-        applyAuthLayout();
-        syncAiEngineStatus();
-        renderCoachChat();
-        generateNumbers();
+      resetGeneratorDefaults();
+      applyAuthLayout();
+      syncAiEngineStatus();
+      if (sbClient) {
+        sbClient.auth.getSession().then(async function(sessionResult) {
+          var authUser = sessionResult && sessionResult.data && sessionResult.data.session
+            ? sessionResult.data.session.user : null;
+          if (authUser) {
+            try { await acceptSupabaseSession(authUser); }
+            catch (err) {
+              await sbClient.auth.signOut();
+              showAuthNotice(els.loginNotice, err.message || "Sesi tidak valid atau akun tidak aktif.");
+            }
+          }
+        }).catch(function(err) {
+          console.warn("Supabase session restore:", err);
+        });
+        sbClient.auth.onAuthStateChange(function(event, session) {
+          if (event === "SIGNED_OUT" && state.currentUser) {
+            state.currentUser = null;
+            state.supabaseUser = null;
+            state.profile = null;
+            applyAuthLayout();
+          }
+        });
       } else {
-        resetGeneratorDefaults();
-        applyAuthLayout();
-        syncAiEngineStatus();
+        showAuthNotice(els.loginNotice, "Supabase JS gagal dimuat. Pastikan perangkat terhubung ke internet.");
       }
     })();
   </script>
